@@ -1,39 +1,52 @@
 name: Terraform AWS Monitoring CI/CD
-on:
-  push:
-    branches:
-    - main
-  workflow_dispatch:  
-pull_request:
+
+on: [push, workflow_dispatch]  
+
 jobs:
   terraform:
     runs-on: ubuntu-latest
+    
+    # Required for OIDC and security best practices
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+
     steps:
-    - name: Checkout code
-    uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Terraform
-    uses: hashicorp/setup-terraform@v3
-    with:
-      terraform_version: 1.5.7
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
 
-    - name: Terraform Init
-    run: terraform init
-    working-directory: eks-infra
+      - name: Terraform Init
+        run: terraform init
+        working-directory: eks-infra
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
-    - name: Terraform Validate
-    run: terraform validate
-    working-directory: eks-infra
+      - name: Terraform Validate
+        run: terraform validate
+        working-directory: eks-infra
 
-    - name: Terraform Plan
-    run: terraform plan
-    working-directory: eks-infra
+      - name: Terraform Plan
+        run: terraform plan
+        working-directory: eks-infra
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
 
-    - name: Terraform Apply
-    if: github.ref == 'refs/heads/main'
-    run: terraform apply -auto-approve
-    working-directory: eks-infra
-    env:
-    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-    AWS_REGION: ${{ secrets.AWS_REGION }}
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: terraform apply -auto-approve
+        working-directory: eks-infra
+        env:
+          # Fixed: Indented these keys by 2 more spaces
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
