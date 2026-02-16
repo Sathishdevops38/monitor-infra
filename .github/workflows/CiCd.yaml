@@ -38,6 +38,6 @@ jobs:
         working-directory: eks-infra
 
       - name: Terraform Apply
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
         run: terraform apply -auto-approve
         working-directory: eks-infra

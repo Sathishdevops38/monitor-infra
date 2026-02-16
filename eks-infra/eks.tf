@@ -12,7 +12,7 @@ module "eks" {
   # 2. Gives access to specific OTHER people/roles
   access_entries = {
     developer_access = {
-      principal_arn = "arn:aws:iam::441700732169:user/developer"
+      principal_arn = "arn:aws:iam::441700732169:user/monitor"
       policy_associations = {
         admin = {
           policy_arn   = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
