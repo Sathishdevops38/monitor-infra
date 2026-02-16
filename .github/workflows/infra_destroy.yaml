@@ -29,5 +29,5 @@ jobs:
         working-directory: eks-infra
 
       - name: Terraform Destroy
-        run: terraform destory -auto-approve
+        run: terraform destroy -auto-approve
         working-directory: eks-infra          
